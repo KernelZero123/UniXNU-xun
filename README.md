@@ -48,13 +48,12 @@ Redmi Pad SE（xun，骁龙 680 / SM6225，eMMC）的 UniXNU 移植骨架。
 
 - 槽位 A。boot 128 MiB。userdata `0x197BF00000`，对应 `mmcblk0p91`。整盘是 `mmcblk0`
 - 内存三段：`0x40000000/0x3CC00000`、`0x80000000/0x40000000`、`0xC0000000/0x100000000`。内核可见约 6092 MiB
-- 没有 `cont_splash_region`。节点是 `splash_region@5c000000`，后面紧挨 `dfps_data_region@5cf00000`
+- splash `0x5C000000` 起 15 MiB。ramoops `0x5D000000` 起 2 MiB。`0x5FC00000` 的 3 MiB FD 落在后面的空档里
 - 这台屏是 `m84_42_03_0c`（video，FHD+）。触控是华星敦泰 FT8203，SPI `4a80000.spi`，不是诺瓦，也不是 Himax
 
 ## 还缺
 
-- userdata 的起始 LBA。要 root 才能跑 `blockdev` 或 `sgdisk -p`
-- `splash_region` 和 `ramoops@5D000000` 的长度。不量这两段，FD 基址不能从 tb128fu 的 `0x5FC00000` 照抄
+分区、splash 长度和 userdata 起始扇区已经有了。还没做的是 Mu 平台包本身：`uefi-xun` 里还没有 `xunPkg`，所以现在仍然没有可刷的镜像。
 
 ## 本目录
 
@@ -63,4 +62,4 @@ Redmi Pad SE（xun，骁龙 680 / SM6225，eMMC）的 UniXNU 移植骨架。
 | `docs/DELTA.md` | 和 tb128fu 的差异，给后面改 dsc/fdf 用 |
 | `configs/xun_defconfig` | 从 `tb128fu_defconfig` 起的占位，**还没改存储驱动** |
 | `docs/DEVICE.md` | 2026-10-31 从这台 xun 读到的分区、内存、屏和触控 |
-| `board.toml.skel` | 骨架。内存三段已改，userdata 起始 LBA 仍空着 |
+| `board.toml.skel` | userdata `first_lba = 0x1d16000`，内存三段已改 |

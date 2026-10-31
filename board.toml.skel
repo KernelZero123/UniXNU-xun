@@ -1,7 +1,7 @@
 # SKELETON ONLY. Do not flash.
 # Copied from UniXNU-tb128fu board.toml and renamed.
 # 2026-10-31 readings from this Redmi Pad SE are in docs/DEVICE.md.
-# userdata first_lba and splash/ramoops lengths are still unknown. Do not flash.
+# userdata first_lba is 0x1d16000 (mmcblk0p91). Still no xunPkg, so do not flash.
 # Storage is mmcblk0.
 
 # Board description of the Lenovo Xiaoxin Pad 2022 (TB128FU, SM6225 bengal), read by the unixnu build driver.
@@ -34,7 +34,7 @@ fetch = ["KernelCache", "DeviceTree", "StaticTrustCache", "Cryptex1,SystemTrustC
 # userdata" writes the image for it; flashing it erases Android's data. The windows are those of UniXNU-sheng: the same
 # target image.
 [userdata]
-first_lba = 0x222f31
+first_lba = 0x1d16000  # mmcblk0p91 start, 512-byte sectors
 last_lba = 0x1c457fa
 lba_bytes = 4096
 windows = [

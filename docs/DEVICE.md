@@ -12,7 +12,7 @@
 - 整盘 `mmcblk0` = 122138624 KiB（约 119276 MiB）
 - 块设备是 `mmcblk0`，不是 `sda`。存储介质是 eMMC
 
-userdata 的起始 LBA 还没有。`/proc/partitions` 不带起始扇区，`blockdev --getsize64` 要 root。`board.toml` 里不能填 `first_lba`。
+`mmcblk0p91` 的 `start` 是 30498816（`0x1d16000`），扇区 512 字节，字节偏移 `0x3A2C00000`。`size` 是 213776384 扇区，`blockdev --getsize64` 是 109453508608，和 fastboot 的 `0x197BF00000` 一致。`board.toml` 的 `first_lba` 用 `0x1d16000`，不再用 tb128fu 的 `0x222f31`。
 
 ## 内存
 
@@ -37,9 +37,16 @@ userdata 的起始 LBA 还没有。`/proc/partitions` 不带起始扇区，`bloc
 - `ramoops@5D000000`
 - `removed_region@60000000`
 
-splash 的 `reg` 没读到。如果它紧挨到 `0x5CF00000`，大小上限是 `0xF00000`（15 MiB），这只是上限，不是测量值。
+`reg` 已读到，大端：
 
-tb128fu 的 FD 放在 `0x5FC00000`。xun 上 `ramoops` 从 `0x5D000000` 开始，`removed_region` 在 `0x60000000`。`0x5FC00000` 落在这两段之间，ramoops 有多大还不知道，所以 FD 基址不能照抄。
+| 节点 | 基址 | 大小 |
+| --- | --- | --- |
+| `splash_region@5c000000` | `0x5C000000` | `0xF00000`（15 MiB），结束 `0x5CF00000` |
+| `dfps_data_region@5cf00000` | `0x5CF00000` | `0x100000`（1 MiB），结束 `0x5D000000` |
+| `ramoops@5D000000` | `0x5D000000` | `0x200000`（2 MiB），结束 `0x5D200000` |
+| `removed_region@60000000` | `0x60000000` | `0x3900000`（57 MiB），结束 `0x63900000` |
+
+`0x5D200000` 到 `0x60000000` 中间空着 46 MiB，而且没有保留区节点。tb128fu 的 FD `0x5FC00000`、3 MiB，结束在 `0x5FF00000`，落在这段空档里，不撞 splash、ramoops 或 removed。它仍在第一段 DRAM（`0x40000000`–`0x7CC00000`）里面，设备树没把它划成保留区，内核会把它当普通内存。固件卷可以先沿用这个地址，但内存图里不能再把它分给别的用途。
 
 ## 这块机器的屏和触控
 
