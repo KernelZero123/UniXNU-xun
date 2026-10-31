@@ -1,8 +1,8 @@
 # SKELETON ONLY. Do not flash.
 # Copied from UniXNU-tb128fu board.toml and renamed.
-# userdata LBA, dram map, splash geometry and touch are still tb128fu's until
-# they are read off a Redmi Pad SE. Storage must be eMMC, not NativeUfs.
-# See docs/DELTA.md.
+# 2026-10-31 readings from this Redmi Pad SE are in docs/DEVICE.md.
+# userdata first_lba and splash/ramoops lengths are still unknown. Do not flash.
+# Storage is mmcblk0.
 
 # Board description of the Lenovo Xiaoxin Pad 2022 (TB128FU, SM6225 bengal), read by the unixnu build driver.
 #
@@ -173,7 +173,12 @@ title = "xun first boot: source 4K XNU to the panic screen"
 # The TB128FU /memory banks are 0x40000000+0x3cc00000, 0x80000000+0x40000000 and 0xc0000000+0x100000000. XNU takes
 # dram-base and dram-size as one range (is_dram_addr, which only picks the attribute of device mappings), so it spans
 # from 0x40000000 to the end of the last bank, across the 0x7cc00000..0x80000000 hole.
-dram_size = "0x180000000"
+# measured /memory reg. Not one span:
+#   0x40000000 / 0x3CC00000
+#   0x80000000 / 0x40000000
+#   0xC0000000 / 0x100000000
+# visible total 0x17CC00000. Hole 0x7CC00000..0x80000000.
+dram_size = "0x17CC00000"
 skip_setup_tool = "scripts/seed-data-skip-setup.py"
 # No input device yet: without these SpringBoard preferences iPadOS turns the display off about 30 s after it starts and
 # puts the system to sleep, which ArmCpu does not support (as on UniXNU-qemu). A changed seed restarts the Data overlay.
@@ -224,8 +229,7 @@ kernel_args = [
   # the userdata policy directory; diagnostics turn a refused policy into a screen report. 2 also times READ(10), before the root
   # is published, over the first 64 MiB of userdata in 128 KiB commands and 512 spread 4 KiB ones (the boot log's [ufs] rows,
   # with the link's gear and lanes and the controller's clocks).
-  "native-ufs-root=1",
-  "native-ufs-diagnostics=2",
+  # native-ufs removed: this device is mmcblk0
   # The Data seed is larger than 2 GiB, so changed pages go through the store window after the root image.
   "sheng-data-persist=2",
   # Continuous on-screen bring-up page, tagged so a photograph says which image it is.

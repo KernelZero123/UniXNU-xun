@@ -38,11 +38,11 @@ xun `fstab.emmc` 的系统分区是 `emmc` + `slotselect`。内核参数里删�
 
 ## 显示
 
-tb128fu 文档写死 1200×2000。xun 是 1920×1200。`SimpleFbDxe` 应该读 splash 节点的真实宽高，不要把 tb128fu 的 mode 拷进 dsc。
+tb128fu 文档写死 1200×2000。这台机器触控坐标是 1200×1920。`SimpleFbDxe` 读 `splash_region@5c000000` 的真实宽高，不要写死 tb128fu 的 1200×2000。
 
 ## 触控
 
-不要编译 `TouchProbe.cpp` / `HimaxProtocol`。xun 的固件文件是：
+这台是敦泰 FT8203，华星，SPI `4a80000.spi`。不要编译 `TouchProbe.cpp` / `HimaxProtocol`。固件文件是：
 
 - `focaltech_ts_fw_boe_ft8203.bin`
 - `focaltech_ts_fw_huaxing_ft8203.bin`

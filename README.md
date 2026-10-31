@@ -38,19 +38,23 @@ Redmi Pad SE（xun，骁龙 680 / SM6225，eMMC）的 UniXNU 移植骨架。
 
 1. **只拿菜单和 splash。** 用 tb128fu 的 Mu 树加 `xunPkg`，DTB 换成 xun 的 Khaje/bengal 树，`SimpleFbDxe` 吃 ABL 留下的 `cont_splash_region`。先确认 UEFI 菜单出现。
 2. **eMMC 读块。** 不要链 `Tb128fuUfs --sm6225`。需要一份走 `4784000.sdhci` 的块设备，或者先用 ramdisk 把根放进内存，存储往后放。
-3. **framebuffer 出画面。** 分辨率按 1920×1200，不要写死 1200×2000。
-4. **触控最后做。** 驱动得换成敦泰 FT8203（或诺瓦），协议和 Himax SPI 完全不同。
+3. **framebuffer 出画面。** 这台的触控坐标是 1200×1920（横屏 1920×1200）。不要写死 tb128fu 的 1200×2000。
+4. **触控最后做。** 这台已经确认是华星敦泰 FT8203，走 SPI。不要编 Himax 的 `TouchProbe.cpp`。
 5. **GPU** 可以后接 Adreno 610 那条，和 tb128fu 同一颗，但 SMMU 窗口和 zap 固件要用 xun 自己的。
 
-## 还缺的真机数据
+## 已经从这台机器读到的
 
-没这些就不要填 `board.toml` 里的 LBA 和内存银行：
+细节在 `docs/DEVICE.md`。
 
-- `fastboot getvar partition-size:boot`、`partition-size:userdata`
-- 一份 `sgdisk -p /dev/block/mmcblk0` 或 Android 里的 `blockdev --getsize64`
-- `/proc/device-tree` 里的 `/memory`、`/reserved-memory/cont_splash_region`
-- 屏幕是哪一套面板（设置里或 `dmesg` 里的 panel name）
-- 触控是 FT8203 还是诺瓦（`dmesg | grep -E 'fts_|nvt'`）
+- 槽位 A。boot 128 MiB。userdata `0x197BF00000`，对应 `mmcblk0p91`。整盘是 `mmcblk0`
+- 内存三段：`0x40000000/0x3CC00000`、`0x80000000/0x40000000`、`0xC0000000/0x100000000`。内核可见约 6092 MiB
+- 没有 `cont_splash_region`。节点是 `splash_region@5c000000`，后面紧挨 `dfps_data_region@5cf00000`
+- 这台屏是 `m84_42_03_0c`（video，FHD+）。触控是华星敦泰 FT8203，SPI `4a80000.spi`，不是诺瓦，也不是 Himax
+
+## 还缺
+
+- userdata 的起始 LBA。要 root 才能跑 `blockdev` 或 `sgdisk -p`
+- `splash_region` 和 `ramoops@5D000000` 的长度。不量这两段，FD 基址不能从 tb128fu 的 `0x5FC00000` 照抄
 
 ## 本目录
 
@@ -58,4 +62,5 @@ Redmi Pad SE（xun，骁龙 680 / SM6225，eMMC）的 UniXNU 移植骨架。
 | --- | --- |
 | `docs/DELTA.md` | 和 tb128fu 的差异，给后面改 dsc/fdf 用 |
 | `configs/xun_defconfig` | 从 `tb128fu_defconfig` 起的占位，**还没改存储驱动** |
-| `board.toml.skel` | 骨架。LBA、内存、分辨率标了 TODO |
+| `docs/DEVICE.md` | 2026-10-31 从这台 xun 读到的分区、内存、屏和触控 |
+| `board.toml.skel` | 骨架。内存三段已改，userdata 起始 LBA 仍空着 |
